@@ -1,0 +1,16 @@
+{
+  "currency": "INR",
+  "damage_costs": {
+    "scratch":       {"minor": 800,  "moderate": 2000, "severe": 4500},
+    "dent":          {"minor": 1500, "moderate": 3500, "severe": 8000},
+    "crack":         {"minor": 1200, "moderate": 3000, "severe": 7000},
+    "glass_shatter": {"minor": 3000, "moderate": 6000, "severe": 12000},
+    "lamp_broken":   {"minor": 1000, "moderate": 2500, "severe": 5000},
+    "tire_damage":   {"minor": 800,  "moderate": 2200, "severe": 6000},
+    "bumper_dent":   {"minor": 2000, "moderate": 4500, "severe": 9500},
+    "paint_chip":    {"minor": 500,  "moderate": 1200, "severe": 2800}
+  },
+  "service_fee": 300,
+  "low_confidence_threshold": 0.5,
+  "notes": "Placeholder repair costs for the MVP demo. Replace damage_costs with real workshop quotes before using this for customer-facing estimates."
+}

@@ -1,0 +1,22 @@
+# Single source of truth for the damage taxonomy.
+# CVAT label list, YOLO training config, and the API all read this file —
+# update it here first when the taxonomy changes, then re-sync CVAT labels.
+
+classes:
+  - scratch
+  - dent
+  - crack
+  - glass_shatter
+  - lamp_broken
+  - tire_damage
+  - bumper_dent
+  - paint_chip
+
+# Severity is derived from how much of the frame a damage instance covers
+# (bounding-box or mask area / image area). These are placeholder cut-offs —
+# tune them once we have real detections to look at, ideally against the
+# detected car's bounding box instead of the whole frame.
+severity_thresholds:
+  minor: 0.02      # area_ratio <  0.02            -> minor
+  moderate: 0.08   # 0.02 <= area_ratio < 0.08      -> moderate
+  # area_ratio >= 0.08                              -> severe

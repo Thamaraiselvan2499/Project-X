@@ -1,0 +1,94 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f7f7f8;
+  color: #1a1a1a;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+header h1 {
+  margin-bottom: 4px;
+}
+
+.upload-panel {
+  margin: 24px 0;
+  padding: 24px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  text-align: center;
+  background: #fff;
+}
+
+.upload-label {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.error-text {
+  color: #e03131;
+}
+
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.annotated-image canvas {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.quotation {
+  flex: 1;
+  min-width: 260px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.quotation table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quotation th,
+.quotation td {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.quotation tr.total-row td {
+  font-weight: 700;
+  border-top: 2px solid #333;
+  border-bottom: none;
+}
+
+.quotation tr.needs-review td {
+  background: #fff3bf;
+}
+
+.stub-banner {
+  background: #e7f5ff;
+  color: #1864ab;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.review-note {
+  color: #e8590c;
+  font-size: 0.9em;
+}
