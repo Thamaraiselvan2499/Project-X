@@ -1,0 +1,7 @@
+# Optional: only needed to run real trained-model detection instead of
+# stub mode (see app/services/detector.py). Pulls in torch, which is a
+# large download and needs real memory at import time — skip this on a
+# free-tier / low-RAM deploy and the app runs fine in stub mode.
+#
+#   pip install -r requirements.txt -r requirements-ml.txt
+ultralytics==8.3.40

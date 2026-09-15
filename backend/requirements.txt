@@ -7,9 +7,5 @@ pyyaml==6.0.2
 numpy==1.26.4
 sqlmodel==0.0.22
 
-# Only needed once real weights exist (ml/scripts/train.py produces them);
-# without it and without weights, the detector runs in stub/demo mode.
-ultralytics==8.3.40
-
 pytest==8.3.4
 httpx==0.28.1
