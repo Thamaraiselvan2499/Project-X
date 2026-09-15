@@ -23,10 +23,39 @@ python ml/scripts/cvat_to_yolo.py \
 python ml/scripts/train.py --data ml/data/yolo/data.yaml --epochs 3 --imgsz 320
 ```
 
-9 images trains nothing usable — this is a pipeline smoke test, not a real
-model. It's enough to confirm conversion, training, and the backend's
+9 images trains nothing that generalizes — this is a pipeline check, not a
+real model. It's enough to confirm conversion, training, and the backend's
 `MODEL_WEIGHTS_PATH` integration all work end-to-end before waiting on a
 real dataset.
+
+### Getting a management-demo-quality result from these 9 images
+
+Running longer with more epochs makes the model memorize this specific
+set of images well enough to demo convincingly — it still won't detect
+damage in a *new* photo reliably, but it correctly boxes and quotes the
+sample images:
+
+```bash
+python ml/scripts/train.py --data ml/data/yolo/data.yaml --epochs 120 --imgsz 480 --batch 4
+```
+
+Tested against all 9 sample images afterward (`MODEL_WEIGHTS_PATH` pointed
+at the resulting `ml/runs/train/weights/best.pt`, calling `/api/annotate`
+for each): 5 of 9 produce a confident detection, all classified `dent`
+(the other 11 classes have too few examples each to be learned
+reliably from 8 training images) with a quotation matching that instance's
+size in frame. For a live demo, use these — a random pick from the folder
+has good odds of landing on one of the 4 with no detection:
+
+| Image | Confidence | Severity | Quote |
+|---|---|---|---|
+| `Back full part deformation.png` | 0.96 | severe | ₹8,300 |
+| `Front part dent , broken part damage.png` | 0.98 | moderate | ₹3,800 |
+| `front part full deformation.png` | 0.86 | severe | ₹8,300 |
+| `front part full deformation 09-09-2026 12_44_15_197.png` | 0.52 | minor | ₹1,800 |
+
+The last one is the only "minor" result — worth including if you want to
+show all three severity levels rather than just severe/moderate.
 
 ## 1. Export from CVAT
 

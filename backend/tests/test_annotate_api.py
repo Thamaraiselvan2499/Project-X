@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from app.main import app
+from app.services import detector
 
 client = TestClient(app)
 
@@ -21,9 +22,20 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
-def test_annotate_runs_in_stub_mode_without_trained_weights():
+def test_annotate_runs_in_stub_mode_without_trained_weights(monkeypatch, tmp_path):
+    # detector._load_model() is memoized process-wide and reads its own
+    # module-level MODEL_WEIGHTS_PATH, so this can't just rely on there
+    # being no file at the default path — a dev machine that's actually
+    # trained a model (as this repo's ml/README.md walks through) would
+    # make that assumption false and this test flaky. Force stub mode
+    # explicitly instead.
+    monkeypatch.setattr(detector, "MODEL_WEIGHTS_PATH", tmp_path / "does_not_exist.pt")
+    detector._load_model.cache_clear()
+
     files = {"file": ("car.jpg", _sample_image_bytes(), "image/jpeg")}
     response = client.post("/api/annotate", files=files)
+    detector._load_model.cache_clear()  # don't leak the stubbed path into other tests
+
     assert response.status_code == 200
 
     body = response.json()

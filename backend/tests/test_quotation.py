@@ -1,3 +1,4 @@
+from app.config import severity_thresholds
 from app.models.schemas import BoundingBox, Detection
 from app.services.quotation import build_quotation
 from app.services.severity import estimate_severity
@@ -50,9 +51,16 @@ def test_low_confidence_detection_flagged_but_still_costed():
 
 
 def test_severity_thresholds_are_monotonic():
+    # Reads the live config rather than hardcoding cutoffs, so this doesn't
+    # silently go stale (and start testing the wrong thing) whenever the
+    # thresholds in damage_classes.yaml get recalibrated.
+    thresholds = severity_thresholds()
+    minor_cutoff = thresholds["minor"]
+    moderate_cutoff = thresholds["moderate"]
+
     assert estimate_severity(0.0) == "minor"
-    assert estimate_severity(0.019) == "minor"
-    assert estimate_severity(0.02) == "moderate"
-    assert estimate_severity(0.079) == "moderate"
-    assert estimate_severity(0.08) == "severe"
-    assert estimate_severity(0.5) == "severe"
+    assert estimate_severity(minor_cutoff - 0.001) == "minor"
+    assert estimate_severity(minor_cutoff) == "moderate"
+    assert estimate_severity(moderate_cutoff - 0.001) == "moderate"
+    assert estimate_severity(moderate_cutoff) == "severe"
+    assert estimate_severity(1.0) == "severe"

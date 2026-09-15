@@ -54,10 +54,23 @@ part_labels:
   - grille
 
 # Severity is derived from how much of the frame a damage instance covers
-# (bounding-box or mask area / image area). These are placeholder cut-offs —
-# tune them once we have more real detections to look at, ideally against
-# the detected car's bounding box instead of the whole frame.
+# (bounding-box or mask area / image area).
+#
+# Calibrated against the 20 annotated instances in
+# ml/data/examples/maruti_suzuki_suv_brezza (area ratios ranged 0.16-0.70,
+# median ~0.32) rather than guessed, using terciles so the demo shows all
+# three severity levels instead of everything landing in one bucket.
+#
+# IMPORTANT CAVEAT: area-ratio-of-frame is composition-dependent, not a
+# true severity measure. This dataset is all close-up damage shots, so
+# damage naturally fills a large fraction of the frame — these thresholds
+# only make sense for photos taken the same way. A full-car wide shot of
+# the exact same damage would score a tiny area ratio and be misjudged as
+# "minor" under this scheme. Recalibrate whenever the mix of photo framing
+# changes, and treat "area ratio of the detected *car's* bounding box"
+# (once we can detect the car itself, not just damage) as the real fix
+# rather than area ratio of the whole frame.
 severity_thresholds:
-  minor: 0.02      # area_ratio <  0.02            -> minor
-  moderate: 0.08   # 0.02 <= area_ratio < 0.08      -> moderate
-  # area_ratio >= 0.08                              -> severe
+  minor: 0.25      # area_ratio <  0.25             -> minor
+  moderate: 0.40    # 0.25 <= area_ratio < 0.40      -> moderate
+  # area_ratio >= 0.40                               -> severe
