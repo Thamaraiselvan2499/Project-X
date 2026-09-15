@@ -1,6 +1,19 @@
 # Architecture
 
-## Pipeline
+## Customer flow
+
+```
+frontend/src/App.jsx (step state machine)
+  LoginPage        -> POST /api/auth/login        (mobile+car number; auto-creates both)
+  CarDetailsPage   -> PUT  /api/cars/{car_number}  (name/brand/variant/body_type — skipped for returning cars)
+  CarViewerPage    -> three.js: rotatable schematic car (car3d/buildCar.js), click hotspots to
+                      pick damaged parts (one hotspot per ml/configs/damage_classes.yaml part_labels entry)
+  UploadPage       -> POST /api/reports              (once, creates the report)
+                   -> POST /api/reports/{id}/items   (one call per selected part + its photo)
+  ReportPage       <- GET-equivalent response from the last items call: itemized costs + total
+```
+
+## Detection pipeline (per uploaded photo)
 
 ```
 ┌─────────────┐   cvat_to_yolo.py    ┌───────────────┐   train.py      ┌──────────────┐
@@ -10,7 +23,7 @@
                                                                                │
                                                                                ▼
 ┌────────────────────────────────────────────────────────────────────────────────────┐
-│ backend/app/services/detector.py                                                    │
+│ backend/app/services/detector.py (via services/analysis.py)                         │
 │   - loads best.pt if MODEL_WEIGHTS_PATH is set and exists                           │
 │   - otherwise returns deterministic stub detections ("stub" mode)                   │
 └──────────────────────────────────────┬───────────────────────────────────────────────┘
@@ -24,16 +37,18 @@
 ┌────────────────────────────────────────────────────────────────────────────────────┐
 │ backend/app/services/quotation.py                                                   │
 │   (damage_type, severity) → cost, from backend/app/data/pricing.json                │
-│   sums line items + a flat service fee → total                                      │
+│   one DamageItem row per detection, tagged with the customer-selected part          │
 └──────────────────────────────────────┬───────────────────────────────────────────────┘
                                         ▼
-                         FastAPI POST /api/annotate (backend/app/routers/annotate.py)
-                                        │  JSON: detections[], quotation, model_mode
-                                        ▼
-                         React frontend (frontend/src/App.jsx)
-                           - AnnotatedImage.jsx: canvas overlay, boxes colored by severity
-                           - QuotationTable.jsx: line items + total, low-confidence flags
+                    SQLite (backend/app/db.py): User -> Car -> DamageReport -> DamageItem
+                    (mobile_number is the User primary key, car_number the Car's —
+                     see the login/no-OTP caveat in CONTRIBUTING.md)
 ```
+
+`/api/annotate` (backend/app/routers/annotate.py) still exists as a standalone
+single-image endpoint sharing the same `analyze_image_bytes` /
+`build_quotation` code — useful for quick manual testing without going
+through the full login/report flow.
 
 ## Why these choices
 
@@ -60,22 +75,45 @@
   list in three places) is what makes `cvat_to_yolo.py` able to flag
   mismatches instead of silently mislabeling data.
 
+## Why these choices (customer flow additions)
+
+- **Part comes from the customer, not the model**: rather than requiring
+  the detector to *also* localize which car part a detection is on (a
+  second model output, or waiting for part-level CVAT annotation — see
+  `ml/configs/damage_classes.yaml`'s `part_labels` comment), the customer
+  points it out on the 3D viewer before uploading. This is simpler,
+  works today with zero part-level training data, and is arguably more
+  reliable than inferring part from a cropped damage photo anyway.
+- **Schematic 3D car, not a licensed/photoreal model**: built from
+  primitives in `car3d/buildCar.js` (boxes for body/cabin, cylinders for
+  wheels, one hotspot sphere per part). Avoids a 3D-asset licensing/
+  sourcing problem entirely — it only needs to be recognizable enough to
+  rotate and point at, not photorealistic.
+- **No OTP at login**: mobile number is the `User` primary key, car number
+  the `Car`'s; a pair that hasn't been seen is auto-created rather than
+  rejected. This is a deliberate scope cut for an internal pilot, not an
+  oversight — see CONTRIBUTING.md before this goes anywhere customer-facing.
+- **DamageReport groups multiple DamageItems**: solves what used to be
+  listed here as an open gap (multi-photo submissions) — a report can have
+  one item per (part, photo), added incrementally across several
+  `POST /api/reports/{id}/items` calls, and the total is always recomputed
+  from every item currently on the report.
+
 ## Known gaps / next decisions
 
-- **Severity ground truth**: current thresholds are guesses. Once there's
-  a batch of real detections, look at the area-ratio distribution and/or
-  get a few engineers to manually severity-label a sample to calibrate.
-- **Part localization**: pricing is currently damage-type + severity only,
-  not damage-type + part (a scratch on a bumper vs. a door may cost
-  differently in practice). Extending the taxonomy to include part would
-  mean either a second model output or compound classes
-  (e.g. `bumper_scratch`).
+- **Severity ground truth**: thresholds are calibrated against one small
+  example dataset (see `ml/README.md`). Revisit as more real detections
+  come in, ideally against the detected car's own bounding box rather
+  than the whole frame (see the caveat in `damage_classes.yaml`).
+- **Part-aware pricing**: a DamageItem already records which part the
+  customer selected, but `quotation.py` still only prices by
+  (damage_type, severity) — a dent on a bumper costs the same as a dent
+  on a door. Extending `pricing.json` to key on (damage_type, part,
+  severity) is a small, isolated change once real per-part costs exist.
 - **Segmentation vs. detection**: if CVAT annotations include polygons,
   training with `--task segment` gives pixel-accurate area instead of a
   bounding-box approximation — worth it if severity accuracy from box
   area alone proves too coarse.
-- **Multi-photo submissions**: real insurance/workshop estimates usually
-  come from several angles of the same vehicle; the current API is
-  single-image. Aggregating multiple `/api/annotate` calls into one
-  quotation (and deduplicating the same damage seen from two angles) is
-  unsolved.
+- **Real auth**: replacing the no-OTP login with actual phone
+  verification (Firebase Phone Auth or an SMS vendor) before this is
+  used outside an internal pilot.

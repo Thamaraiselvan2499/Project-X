@@ -10,24 +10,28 @@ from app.config import load_pricing
 from app.models.schemas import Detection, Quotation, QuotationLineItem
 
 
+def cost_and_review_for(damage_type: str, severity: str, needs_review: bool) -> tuple[float, bool]:
+    """Cost (and whether it should be flagged for manual review) for a
+    single (damage_type, severity) pair. Shared by build_quotation, below,
+    and the per-part report items endpoint, which stores this same cost
+    per detection rather than only as part of an aggregate quotation."""
+    damage_costs = load_pricing()["damage_costs"]
+    cost_table = damage_costs.get(damage_type)
+    if cost_table is None:
+        # Unknown class (e.g. taxonomy drift between model and pricing
+        # config) — flag for manual review instead of silently costing it
+        # at 0 or crashing the request.
+        return 0.0, True
+    return float(cost_table.get(severity, 0.0)), needs_review
+
+
 def build_quotation(detections: list[Detection]) -> Quotation:
     pricing = load_pricing()
-    damage_costs = pricing["damage_costs"]
     service_fee = float(pricing["service_fee"])
 
     line_items: list[QuotationLineItem] = []
     for det in detections:
-        cost_table = damage_costs.get(det.damage_type)
-        if cost_table is None:
-            # Unknown class (e.g. taxonomy drift between model and pricing
-            # config) — flag for manual review instead of silently costing
-            # it at 0 or crashing the request.
-            cost = 0.0
-            needs_review = True
-        else:
-            cost = float(cost_table.get(det.severity, 0.0))
-            needs_review = det.needs_review
-
+        cost, needs_review = cost_and_review_for(det.damage_type, det.severity, det.needs_review)
         line_items.append(
             QuotationLineItem(
                 damage_type=det.damage_type,

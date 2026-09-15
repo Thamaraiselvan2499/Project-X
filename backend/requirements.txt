@@ -5,6 +5,7 @@ pydantic==2.10.3
 pillow==11.0.0
 pyyaml==6.0.2
 numpy==1.26.4
+sqlmodel==0.0.22
 
 # Only needed once real weights exist (ml/scripts/train.py produces them);
 # without it and without weights, the detector runs in stub/demo mode.

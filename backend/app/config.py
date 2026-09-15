@@ -36,6 +36,17 @@ PRICING_PATH = Path(
 # manual review rather than silently trusted in the quotation.
 DETECTION_CONFIDENCE_THRESHOLD = float(os.environ.get("DETECTION_CONFIDENCE_THRESHOLD", "0.25"))
 
+# SQLite file holding users/cars/damage reports. Gitignored like other
+# local state — each environment (dev machine, demo, deployment) has its
+# own. Override for tests so they don't touch real data.
+DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", APP_DIR / "data" / "app.db"))
+
+# Where uploaded damage photos are saved (also gitignored).
+UPLOADS_DIR = Path(os.environ.get("UPLOADS_DIR", APP_DIR / "data" / "uploads"))
+
+# Body types we have a 3D model shape for in the frontend car viewer.
+BODY_TYPES = ["hatchback", "sedan", "suv"]
+
 
 @lru_cache
 def load_damage_taxonomy() -> dict[str, Any]:
@@ -55,3 +66,7 @@ def class_names() -> list[str]:
 
 def severity_thresholds() -> dict[str, float]:
     return dict(load_damage_taxonomy()["severity_thresholds"])
+
+
+def part_labels() -> list[str]:
+    return list(load_damage_taxonomy().get("part_labels", []))

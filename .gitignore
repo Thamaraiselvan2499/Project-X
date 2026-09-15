@@ -29,6 +29,11 @@ ml/runs/
 *.pth
 *.weights
 
+# Backend runtime data (per-environment, not shared via git)
+backend/app/data/app.db
+backend/app/data/uploads/
+backend/tests/_test_data/
+
 # Misc
 .DS_Store
 *.log

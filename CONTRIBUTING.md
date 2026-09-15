@@ -11,13 +11,24 @@ without stepping on each other is straightforward:
   YOLO format, training, tuning severity thresholds.
 - **Backend** (`backend/`): API, quotation/pricing logic, integrating
   trained weights, tests.
-- **Frontend** (`frontend/`): upload UI, annotated-image rendering,
-  quotation display, eventually auth/history if needed.
+- **Frontend** (`frontend/`): the login → car details → 3D viewer → upload
+  → report flow, the 3D car/hotspot layout (`frontend/src/car3d/`).
 
 Pick whichever matches your focus; the interfaces between them are small
 and explicit (`data.yaml` between ML and training, `MODEL_WEIGHTS_PATH`
-between ML and backend, the `/api/annotate` JSON contract between backend
-and frontend), so a change on one side rarely blocks the others.
+between ML and backend, `/api/taxonomy` + the reports API contract between
+backend and frontend), so a change on one side rarely blocks the others.
+
+## Login has no OTP / real auth yet
+
+`POST /api/auth/login` auto-creates a `User` (keyed on mobile number) and
+`Car` (keyed on car number) the first time that pair is seen — there's no
+verification that the person logging in actually owns that mobile number.
+This is a deliberate scope cut to unblock the rest of the flow (car
+details, the 3D viewer, uploads, reports) without waiting on a phone-OTP
+integration. **Don't point this at real customer data or deploy it
+anywhere public without adding real verification first** (Firebase Phone
+Auth is the lowest-setup option — see `docs/ARCHITECTURE.md`).
 
 ## Branching
 
@@ -46,6 +57,14 @@ If you add/rename/remove a damage type:
    (minor/moderate/severe) — an unmapped class is flagged `needs_review`
    with cost 0 rather than crashing, but it should still get a real price.
 4. Re-run `cvat_to_yolo.py` and retrain.
+
+**Changing `part_labels` specifically** also means updating
+`frontend/src/car3d/buildCar.js`'s `HOTSPOT_LAYOUT` — the 3D viewer's
+clickable parts are a hardcoded list there, not fetched from
+`/api/taxonomy` at render time. Removing or renaming a part in the yaml
+without updating `HOTSPOT_LAYOUT` leaves a clickable hotspot in the UI
+that the backend will reject with a 400 when the customer tries to upload
+a photo for it.
 
 ## Updating repair pricing
 
