@@ -5,11 +5,14 @@ Supports the two most common CVAT export formats:
   - "CVAT for images 1.1" (an annotations.xml with <image>/<box>/<polygon> tags)
   - "COCO 1.0" (an instances_*.json file)
 
-Boxes become YOLO detection labels (`class xc yc w h`, normalized).
-Polygons become YOLO-seg labels (`class x1 y1 x2 y2 ... xn yn`, normalized).
-An image with only boxes still trains a detection model; if *any* image in
-the export has polygons, prefer training with `ml/scripts/train.py --task
-segment` since a mix of formats in one label file is not valid YOLO.
+Every object is normalized to one label format across the whole dataset
+(controlled by --label-format, default "box"), because YOLO can't train on
+a mix of detection-format and segmentation-format label files, and real
+CVAT exports routinely mix box and polygon shapes across images (ours does:
+6 of 9 images here are polygons, 3 are plain boxes). "box" derives a
+bounding box from any polygon; "polygon" synthesizes a rectangular mask for
+any plain box. Pick "box" for `train.py --task detect` (the default) or
+"polygon" for `--task segment`.
 
 Usage:
     python ml/scripts/cvat_to_yolo.py \\
@@ -23,12 +26,20 @@ Usage:
         --images-dir path/to/images \\
         --format coco \\
         --output ml/data/yolo
+
+Multiple brands/exports can be merged into one training set by running this
+script once per export against the *same* --output directory (each run adds
+to images/{train,val} and labels/{train,val} rather than clearing them).
+Pass --dataset-name (or rely on the auto-derived one from --images-dir) so
+that images with the same filename from different exports — e.g. two brands
+each having a "front side damage.png" — don't collide.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import random
+import re
 import shutil
 import sys
 import xml.etree.ElementTree as ET
@@ -55,7 +66,16 @@ class ImageAnnotation:
 
 
 def normalize_label(label: str) -> str:
-    return label.strip().lower().replace(" ", "_").replace("-", "_")
+    return label.strip().lower().replace(" ", "_").replace("-", "_").replace("/", "_")
+
+
+def sanitize_filename(name: str) -> str:
+    """CVAT image names can contain spaces, commas, parentheses, etc.
+    (fine for CVAT, awkward for shell tools / some YOLO caching code) — swap
+    anything outside [a-z0-9._-] for an underscore in the *output* filename.
+    The original name is still what's used to look the source file up."""
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("_")
+    return stem
 
 
 def parse_cvat_xml(xml_path: Path) -> list[ImageAnnotation]:
@@ -119,7 +139,41 @@ def parse_coco(json_path: Path) -> list[ImageAnnotation]:
     return list(images_by_id.values())
 
 
-def to_yolo_lines(image_ann: ImageAnnotation, class_index: dict[str, int], unknown_labels: set[str]) -> list[str]:
+def _bbox_of(obj: ObjectAnnotation) -> tuple[float, float, float, float]:
+    """The object's bbox, computed from its polygon's extent if it doesn't
+    have one directly (every polygon has a bounding box; not every box has
+    a polygon)."""
+    if obj.bbox:
+        return obj.bbox
+    xs = [p[0] for p in obj.polygon]
+    ys = [p[1] for p in obj.polygon]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _polygon_of(obj: ObjectAnnotation) -> list[tuple[float, float]]:
+    """The object's polygon, synthesized as the box's four corners if it
+    doesn't have a real one. A degenerate (rectangular) mask, but it keeps
+    the object trainable in a segmentation dataset instead of dropping it."""
+    if obj.polygon:
+        return obj.polygon
+    x_min, y_min, x_max, y_max = obj.bbox
+    return [(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)]
+
+
+def to_yolo_lines(
+    image_ann: ImageAnnotation,
+    class_index: dict[str, int],
+    unknown_labels: set[str],
+    label_format: str = "box",
+) -> list[str]:
+    """CVAT exports commonly mix box and polygon shapes across images (as
+    this one does) — YOLO can't train on a label directory that mixes
+    detection-format (4 numbers) and segmentation-format (6+ numbers) lines,
+    so every object is normalized to one format for the whole dataset:
+    `label_format="box"` derives a bounding box from polygons that have one;
+    `label_format="polygon"` synthesizes a rectangular polygon for objects
+    that only have a box.
+    """
     lines = []
     w, h = image_ann.width, image_ann.height
     for obj in image_ann.objects:
@@ -128,14 +182,14 @@ def to_yolo_lines(image_ann: ImageAnnotation, class_index: dict[str, int], unkno
             continue
         idx = class_index[obj.label]
 
-        if obj.polygon:
+        if label_format == "polygon":
             coords = []
-            for px, py in obj.polygon:
+            for px, py in _polygon_of(obj):
                 coords.append(f"{px / w:.6f}")
                 coords.append(f"{py / h:.6f}")
             lines.append(f"{idx} " + " ".join(coords))
-        elif obj.bbox:
-            x_min, y_min, x_max, y_max = obj.bbox
+        else:
+            x_min, y_min, x_max, y_max = _bbox_of(obj)
             xc = ((x_min + x_max) / 2) / w
             yc = ((y_min + y_max) / 2) / h
             bw = (x_max - x_min) / w
@@ -151,6 +205,8 @@ def build_dataset(
     classes: list[str],
     val_split: float,
     seed: int,
+    dataset_name: str,
+    label_format: str,
 ) -> None:
     class_index = {normalize_label(c): i for i, c in enumerate(classes)}
     unknown_labels: set[str] = set()
@@ -175,16 +231,20 @@ def build_dataset(
     written = 0
     for img in resolvable:
         split = "val" if id(img) in val_set else "train"
-        lines = to_yolo_lines(img, class_index, unknown_labels)
+        lines = to_yolo_lines(img, class_index, unknown_labels, label_format)
 
         src = images_dir / img.filename
-        dst_image = output_dir / "images" / split / Path(img.filename).name
+        out_stem = sanitize_filename(f"{dataset_name}__{Path(img.filename).stem}")
+        dst_image = output_dir / "images" / split / (out_stem + Path(img.filename).suffix)
         shutil.copyfile(src, dst_image)
 
-        label_path = output_dir / "labels" / split / (Path(img.filename).stem + ".txt")
+        label_path = output_dir / "labels" / split / (out_stem + ".txt")
         label_path.write_text("\n".join(lines) + ("\n" if lines else ""))
         written += 1
 
+    # Re-written (not merged) each run, but the values are static regardless
+    # of how many exports have been appended into images/labels so far, so
+    # this is safe to run once per export against a shared --output dir.
     data_yaml = {
         "path": str(output_dir.resolve()),
         "train": "images/train",
@@ -223,6 +283,21 @@ def main() -> None:
     parser.add_argument("--format", choices=["auto", "cvat_xml", "coco"], default="auto")
     parser.add_argument("--val-split", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--dataset-name",
+        default=None,
+        help="Prefix for output filenames, so exports from different brands/tasks don't collide "
+        "when merged into one --output dir (default: derived from --images-dir's parent folder name)",
+    )
+    parser.add_argument(
+        "--label-format",
+        choices=["box", "polygon"],
+        default="box",
+        help="Output format every object is normalized to (default: box). CVAT exports commonly mix "
+        "box and polygon shapes across images, which YOLO can't train on directly. 'box' derives a "
+        "bounding box from any polygon (works with ml/scripts/train.py --task detect); 'polygon' "
+        "synthesizes a rectangular mask for any plain box (works with --task segment).",
+    )
     args = parser.parse_args()
 
     fmt = args.format if args.format != "auto" else detect_format(args.input)
@@ -231,7 +306,10 @@ def main() -> None:
     with open(args.classes) as f:
         classes = yaml.safe_load(f)["classes"]
 
-    build_dataset(images, args.images_dir, args.output, classes, args.val_split, args.seed)
+    dataset_name = args.dataset_name or sanitize_filename(args.images_dir.resolve().parent.name.lower())
+    build_dataset(
+        images, args.images_dir, args.output, classes, args.val_split, args.seed, dataset_name, args.label_format
+    )
 
 
 if __name__ == "__main__":

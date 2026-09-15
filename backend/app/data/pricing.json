@@ -1,16 +1,20 @@
 {
   "currency": "INR",
   "damage_costs": {
-    "scratch":       {"minor": 800,  "moderate": 2000, "severe": 4500},
-    "dent":          {"minor": 1500, "moderate": 3500, "severe": 8000},
-    "crack":         {"minor": 1200, "moderate": 3000, "severe": 7000},
-    "glass_shatter": {"minor": 3000, "moderate": 6000, "severe": 12000},
-    "lamp_broken":   {"minor": 1000, "moderate": 2500, "severe": 5000},
-    "tire_damage":   {"minor": 800,  "moderate": 2200, "severe": 6000},
-    "bumper_dent":   {"minor": 2000, "moderate": 4500, "severe": 9500},
-    "paint_chip":    {"minor": 500,  "moderate": 1200, "severe": 2800}
+    "dent":                 {"minor": 1500, "moderate": 3500, "severe": 8000},
+    "scratch":              {"minor": 800,  "moderate": 2000, "severe": 4500},
+    "crack":                {"minor": 1200, "moderate": 3000, "severe": 7000},
+    "paint_damage":         {"minor": 600,  "moderate": 1500, "severe": 3500},
+    "broken_part":          {"minor": 2500, "moderate": 5000, "severe": 12000},
+    "deformation":          {"minor": 3000, "moderate": 7000, "severe": 15000},
+    "missing_part":         {"minor": 3000, "moderate": 6000, "severe": 15000},
+    "paint_transfer":       {"minor": 500,  "moderate": 1200, "severe": 2800},
+    "scuff":                {"minor": 500,  "moderate": 1200, "severe": 2500},
+    "hole_puncture":        {"minor": 2000, "moderate": 4500, "severe": 10000},
+    "shatter":              {"minor": 3000, "moderate": 6000, "severe": 12000},
+    "dislodged_misaligned": {"minor": 800,  "moderate": 2000, "severe": 5000}
   },
   "service_fee": 300,
   "low_confidence_threshold": 0.5,
-  "notes": "Placeholder repair costs for the MVP demo. Replace damage_costs with real workshop quotes before using this for customer-facing estimates."
+  "notes": "Placeholder repair costs for the MVP demo, aligned to the 12 damage-type labels in the Maruti_Brezza_SUV_Damage CVAT project. Replace damage_costs with real workshop quotes before using this for customer-facing estimates. Not yet part-aware (see ml/configs/damage_classes.yaml part_labels) — same damage type costs the same regardless of which panel it's on."
 }

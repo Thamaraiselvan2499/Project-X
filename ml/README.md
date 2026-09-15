@@ -4,6 +4,30 @@ Converts CVAT annotations into a YOLO dataset, trains a detector, and
 provides an evaluation script that runs the same severity + quotation
 logic the backend uses.
 
+## Try it now with the checked-in example
+
+`ml/data/examples/maruti_suzuki_suv_brezza/` is a real (small) CVAT export
+committed to the repo — 9 images from the `Maruti_Brezza_SUV_Damage` CVAT
+project — so anyone can run the whole pipeline immediately without needing
+CVAT access first:
+
+```bash
+pip install -r ml/requirements.txt
+
+python ml/scripts/cvat_to_yolo.py \
+    --input ml/data/examples/maruti_suzuki_suv_brezza/annotations.xml \
+    --images-dir ml/data/examples/maruti_suzuki_suv_brezza/images \
+    --output ml/data/yolo \
+    --classes ml/configs/damage_classes.yaml
+
+python ml/scripts/train.py --data ml/data/yolo/data.yaml --epochs 3 --imgsz 320
+```
+
+9 images trains nothing usable — this is a pipeline smoke test, not a real
+model. It's enough to confirm conversion, training, and the backend's
+`MODEL_WEIGHTS_PATH` integration all work end-to-end before waiting on a
+real dataset.
+
 ## 1. Export from CVAT
 
 In CVAT: Task/Project → Export dataset →
@@ -13,14 +37,13 @@ In CVAT: Task/Project → Export dataset →
 Either works. Also export/download the task's images if they aren't
 already on disk locally.
 
-Keep exports out of git — `ml/data/` is gitignored except for this README
-and folder structure. Put exports under e.g. `ml/data/raw/<export-name>/`.
+For a real (large) export, put it under `ml/data/raw/<brand-or-task-name>/`
+— that path is gitignored, unlike `ml/data/examples/`. Only small,
+deliberately-committed reference datasets belong under `examples/`.
 
 ## 2. Convert to YOLO format
 
 ```bash
-pip install -r ml/requirements.txt
-
 python ml/scripts/cvat_to_yolo.py \
     --input ml/data/raw/my_export/annotations.xml \
     --images-dir ml/data/raw/my_export/images \
@@ -33,9 +56,19 @@ that `train.py` consumes. Labels in the CVAT export that aren't in
 `ml/configs/damage_classes.yaml` are skipped with a warning — fix the
 taxonomy file or the CVAT labels so they match, then re-run.
 
-If any annotation is a polygon, the corresponding label is written in
-YOLO-seg format; if it's only boxes, plain YOLO detection format is used.
-Don't mix the two in one training run.
+**Real CVAT exports mix box and polygon shapes across images** (the
+checked-in example does: 6 of 9 images are polygons, 3 are plain boxes) —
+YOLO can't train on a label directory that mixes the two formats. Every
+object is normalized to one format via `--label-format` (default `box`,
+which derives a bounding box from any polygon; use `polygon` to instead
+synthesize a rectangular mask for any plain box, for `--task segment`).
+
+**Adding another brand?** Run this script again with the same `--output`
+— each run appends into `images/{train,val}` and `labels/{train,val}`
+rather than clearing them, and output filenames are prefixed with a
+dataset name (auto-derived from `--images-dir`'s parent folder, or set
+`--dataset-name`) so two brands' images with the same filename (e.g. both
+having a "front side damage.png") don't collide.
 
 ## 3. Train
 
@@ -43,11 +76,12 @@ Don't mix the two in one training run.
 python ml/scripts/train.py --data ml/data/yolo/data.yaml --task detect --epochs 100
 ```
 
-Use `--task segment` (with a dataset converted from polygon annotations)
-if we want per-pixel masks instead of boxes — better area estimates for
-severity, heavier to train.
+Use `--task segment` (with a dataset converted with `--label-format
+polygon`) if we want per-pixel masks instead of boxes — better area
+estimates for severity, heavier to train.
 
-Weights land at `ml/runs/train/weights/best.pt`. Point the backend at them:
+Weights land at `ml/runs/<name>/weights/best.pt` (`ml/runs/train/...` by
+default). Point the backend at them:
 
 ```bash
 export MODEL_WEIGHTS_PATH=$(pwd)/ml/runs/train/weights/best.pt
@@ -71,8 +105,11 @@ starting the server.
 
 ## Tuning severity & pricing
 
-- `ml/configs/damage_classes.yaml` — class list and area-ratio thresholds
-  for minor/moderate/severe. These are placeholders; revisit once we can
-  look at real detection output.
+- `ml/configs/damage_classes.yaml` — the 12-class damage taxonomy (sourced
+  from the real CVAT project, not guessed), the 20-label part taxonomy
+  (defined in CVAT but not yet annotated anywhere — see the comment in that
+  file), and the area-ratio thresholds for minor/moderate/severe. The
+  thresholds are placeholders; revisit once we can look at real detection
+  output.
 - `backend/app/data/pricing.json` — repair cost per (damage type, severity).
   Also placeholder numbers — replace with real workshop quotes.

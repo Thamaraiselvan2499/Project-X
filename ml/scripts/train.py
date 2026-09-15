@@ -16,8 +16,14 @@ ml/runs/weights/best.pt (the backend's default lookup path).
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from ultralytics import YOLO
+
+# ultralytics silently nests a *relative* --project under its own global
+# runs_dir setting (e.g. "ml/runs" becomes "<cwd>/runs/detect/ml/runs") —
+# default to an absolute path so weights land exactly where documented.
+DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1] / "runs"
 
 
 def main() -> None:
@@ -33,7 +39,12 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--imgsz", type=int, default=640)
     parser.add_argument("--batch", type=int, default=16)
-    parser.add_argument("--project", default="ml/runs", help="Output directory for training runs")
+    parser.add_argument(
+        "--project",
+        type=Path,
+        default=DEFAULT_PROJECT_DIR,
+        help=f"Output directory for training runs (default: {DEFAULT_PROJECT_DIR})",
+    )
     parser.add_argument("--name", default="train")
     args = parser.parse_args()
 
@@ -45,7 +56,7 @@ def main() -> None:
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
-        project=args.project,
+        project=str(args.project.resolve()),
         name=args.name,
     )
 

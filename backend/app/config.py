@@ -21,7 +21,7 @@ REPO_ROOT = BACKEND_DIR.parent
 # Trained weights are produced by ml/scripts/train.py and are not committed
 # to git (see .gitignore) — override via env var once a model is trained.
 MODEL_WEIGHTS_PATH = Path(
-    os.environ.get("MODEL_WEIGHTS_PATH", REPO_ROOT / "ml" / "runs" / "weights" / "best.pt")
+    os.environ.get("MODEL_WEIGHTS_PATH", REPO_ROOT / "ml" / "runs" / "train" / "weights" / "best.pt")
 )
 
 DAMAGE_CLASSES_PATH = Path(

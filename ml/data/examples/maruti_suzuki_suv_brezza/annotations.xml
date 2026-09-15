@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotations>
+  <version>1.1</version>
+  <meta>
+    <task>
+      <id>2578818</id>
+      <name>Maruti_Brezza_SUV_Damage</name>
+      <size>9</size>
+      <mode>annotation</mode>
+      <overlap>0</overlap>
+      <bugtracker></bugtracker>
+      <created>2026-09-09 08:26:52.209777+00:00</created>
+      <updated>2026-09-10 05:23:07.288705+00:00</updated>
+      <subset>Train</subset>
+      <start_frame>0</start_frame>
+      <stop_frame>8</stop_frame>
+      <frame_filter></frame_filter>
+      <segments>
+        <segment>
+          <id>4455415</id>
+          <start>0</start>
+          <stop>8</stop>
+          <url>https://app.cvat.ai/api/tasks/2578818/dataset/export/api/jobs/4457853</url>
+        </segment>
+      </segments>
+      <owner>
+        <username>poornima9</username>
+        <email>hropshuetouch@gmail.com</email>
+      </owner>
+      <assignee></assignee>
+      <labels>
+        <label>
+          <name>Dent</name>
+          <color>#ee6859</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Scratch</name>
+          <color>#202b48</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Crack</name>
+          <color>#a5ecdf</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Paint Damage</name>
+          <color>#6caf92</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Broken Part</name>
+          <color>#c09a3b</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Deformation</name>
+          <color>#1aaa2c</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Missing Part</name>
+          <color>#b07e51</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Paint Transfer</name>
+          <color>#e80538</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Scuff</name>
+          <color>#83751f</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Hole/Puncture</name>
+          <color>#9a683e</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Shatter</name>
+          <color>#d3cedc</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Dislodged/Misaligned</name>
+          <color>#8d2350</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Front Bumper</name>
+          <color>#55acb2</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Rear Bumper</name>
+          <color>#1650c4</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Bonnet</name>
+          <color>#2fb273</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Boot Lid</name>
+          <color>#ea6181</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Roof</name>
+          <color>#60e060</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Front Fender</name>
+          <color>#c4a826</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Front Fender</name>
+          <color>#2c2b93</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Front Door</name>
+          <color>#cf1b2f</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Front Door</name>
+          <color>#26c5b1</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Rear Door</name>
+          <color>#6af8a2</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Rear Door</name>
+          <color>#143c23</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Quarter Panel</name>
+          <color>#9576a4</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Quarter Panel</name>
+          <color>#686b98</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Side Mirror</name>
+          <color>#a40e71</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Side Mirror</name>
+          <color>#b49784</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Front Windshield</name>
+          <color>#57cc4d</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Rear Windshield</name>
+          <color>#fd4cac</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Headlight</name>
+          <color>#38e1dc</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Headlight</name>
+          <color>#8de299</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Left Tail Light</name>
+          <color>#cb187b</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Right Tail Light</name>
+          <color>#654678</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>Grille</name>
+          <color>#4ae005</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+      </labels>
+    </task>
+    <dumped>2026-09-11 05:48:51.595984+00:00</dumped>
+  </meta>
+  <image id="0" name="Maruti Suzuki SUV Brezza Damage Images/Back full part deformation.png" width="550" height="287">
+    <polygon label="Dent" source="manual" occluded="0" points="127.37,17.57;86.85,47.96;84.92,157.48;501.28,257.83;546.63,112.13;491.63,42.17" z_order="0">
+    </polygon>
+    <polygon label="Broken Part" source="manual" occluded="0" points="111.45,24.32;519.61,42.65;540.36,135.77;501.76,244.32;305.40,170.02;85.90,145.40" z_order="0">
+    </polygon>
+  </image>
+  <image id="1" name="Maruti Suzuki SUV Brezza Damage Images/Front left side dent, headlight broken and deformation.png" width="471" height="273">
+    <polygon label="Broken Part" source="manual" occluded="0" points="192.50,21.63;273.14,44.60;214.60,155.40;135.30,168.00;108.71,75.24;161.87,49.11" z_order="0">
+    </polygon>
+    <polygon label="Dent" source="manual" occluded="0" points="131.68,97.31;41.58,118.03;42.93,153.17;62.31,201.37;195.65,188.76;234.85,133.35" z_order="0">
+    </polygon>
+  </image>
+  <image id="2" name="Maruti Suzuki SUV Brezza Damage Images/Front part dent , broken part damage.png" width="536" height="280">
+    <polygon label="Dent" source="manual" occluded="0" points="97.81,7.16;446.48,0.00;464.13,0.00;476.30,90.38;330.08,137.40;203.60,150.09;114.74,71.58" z_order="0">
+    </polygon>
+    <polygon label="Broken Part" source="manual" occluded="0" points="147.65,2.46;464.55,0.58;480.53,89.91;377.10,151.04;136.84,106.84;115.21,12.80" z_order="0">
+    </polygon>
+  </image>
+  <image id="3" name="Maruti Suzuki SUV Brezza Damage Images/Full car damage.png" width="522" height="246">
+    <polygon label="Deformation" source="manual" occluded="0" points="253.24,11.06;108.09,69.67;240.87,98.97;355.81,103.09;457.46,104.47;477.61,102.64;454.71,67.38;406.17,44.03;338.41,22.96;293.53,14.72" z_order="0">
+    </polygon>
+    <polygon label="Dent" source="manual" occluded="0" points="67.33,98.06;234.46,86.15;377.33,94.39;473.94,93.94;485.39,154.38;436.85,144.30;388.32,162.62;355.80,178.60;250.90,188.30;219.40,154.80" z_order="0">
+    </polygon>
+    <polygon label="Broken Part" source="manual" occluded="0" points="269.26,14.26;295.82,18.38;336.12,25.25;394.27,43.57;438.23,60.05;467.07,95.31;364.96,93.94;234.92,87.07;115.41,74.25;240.90,13.80" z_order="0">
+    </polygon>
+  </image>
+  <image id="4" name="Maruti Suzuki SUV Brezza Damage Images/front part full deformation 09-09-2026 12_44_15_197.png" width="352" height="252">
+    <polygon label="Dent" source="manual" occluded="0" points="206.76,76.31;184.30,184.80;121.10,179.90;2.17,72.99;101.56,76.73;144.39,74.65" z_order="0">
+    </polygon>
+    <polygon label="Deformation" source="manual" occluded="0" points="246.68,26.83;274.13,24.33;293.67,88.79;344.41,116.23;349.81,181.52;165.59,86.71" z_order="0">
+    </polygon>
+    <polygon label="Scratch" source="manual" occluded="0" points="186.80,193.60;181.40,79.20;5.91,109.17;23.38,173.62;80.35,188.59" z_order="0">
+    </polygon>
+  </image>
+  <image id="5" name="Maruti Suzuki SUV Brezza Damage Images/front part full deformation.png" width="173" height="196">
+    <box label="Broken Part" source="manual" occluded="0" xtl="0.31" ytl="55.46" xbr="167.20" ybr="114.32" z_order="0">
+    </box>
+    <box label="Dent" source="manual" occluded="0" xtl="6.46" ytl="48.99" xbr="156.85" ybr="144.08" z_order="0">
+    </box>
+  </image>
+  <image id="6" name="Maruti Suzuki SUV Brezza Damage Images/front side damage.png" width="235" height="296">
+    <box label="Dent" source="manual" occluded="0" xtl="2.94" ytl="62.28" xbr="183.17" ybr="184.88" z_order="0">
+    </box>
+    <box label="Scratch" source="manual" occluded="0" xtl="2.94" ytl="75.96" xbr="188.20" ybr="192.60" z_order="0">
+    </box>
+  </image>
+  <image id="7" name="Maruti Suzuki SUV Brezza Damage Images/left front side dent and headlight damage.png" width="238" height="300">
+    <box label="Dent" source="manual" occluded="0" xtl="13.07" ytl="51.24" xbr="232.10" ybr="174.90" z_order="0">
+    </box>
+  </image>
+  <image id="8" name="Maruti Suzuki SUV Brezza Damage Images/right and front dumper dent and right front door dent damage.png" width="542" height="331">
+    <polygon label="Broken Part" source="manual" occluded="0" points="269.56,43.65;387.69,120.14;519.43,212.78;389.39,273.98;168.42,154.99;177.77,29.21" z_order="0">
+    </polygon>
+    <polygon label="Deformation" source="manual" occluded="0" points="160.77,31.76;276.36,32.61;378.34,117.60;518.58,195.79;527.07,241.68;220.30,155.00" z_order="0">
+    </polygon>
+    <polygon label="Dent" source="manual" occluded="0" points="442.08,159.24;220.26,130.34;122.52,122.69;109.78,232.33;263.61,225.53;525.37,229.78" z_order="0">
+    </polygon>
+  </image>
+</annotations>

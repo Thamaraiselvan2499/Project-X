@@ -1,21 +1,62 @@
 # Single source of truth for the damage taxonomy.
-# CVAT label list, YOLO training config, and the API all read this file —
-# update it here first when the taxonomy changes, then re-sync CVAT labels.
+#
+# Sourced from the real CVAT project (Maruti_Brezza_SUV_Damage, task 2578818,
+# owner poornima9) rather than guessed — CVAT label list, YOLO training
+# config, and the pricing table all read this file. If the CVAT taxonomy
+# changes, update it here first, then re-sync CVAT's label list to match.
 
+# What kind of damage a region shows. This is what the detector model
+# predicts per bounding box / polygon.
 classes:
-  - scratch
   - dent
+  - scratch
   - crack
-  - glass_shatter
-  - lamp_broken
-  - tire_damage
-  - bumper_dent
-  - paint_chip
+  - paint_damage
+  - broken_part
+  - deformation
+  - missing_part
+  - paint_transfer
+  - scuff
+  - hole_puncture
+  - shatter
+  - dislodged_misaligned
+
+# Which car component a damage instance is on. Defined as CVAT labels
+# already, but NOT YET ANNOTATED in any export we have (every image so far
+# only has damage-type shapes, no part shapes) and NOT YET used by
+# cvat_to_yolo.py, the detector, or pricing. Kept here so the taxonomy is
+# documented in one place ahead of the annotation team actually labeling
+# parts. Once part shapes show up in a CVAT export, this is where
+# part-aware pricing (damage_type x part x severity) would plug in instead
+# of damage_type x severity alone.
+part_labels:
+  - front_bumper
+  - rear_bumper
+  - bonnet
+  - boot_lid
+  - roof
+  - left_front_fender
+  - right_front_fender
+  - left_front_door
+  - right_front_door
+  - left_rear_door
+  - right_rear_door
+  - left_quarter_panel
+  - right_quarter_panel
+  - left_side_mirror
+  - right_side_mirror
+  - front_windshield
+  - rear_windshield
+  - left_headlight
+  - right_headlight
+  - left_tail_light
+  - right_tail_light
+  - grille
 
 # Severity is derived from how much of the frame a damage instance covers
 # (bounding-box or mask area / image area). These are placeholder cut-offs —
-# tune them once we have real detections to look at, ideally against the
-# detected car's bounding box instead of the whole frame.
+# tune them once we have more real detections to look at, ideally against
+# the detected car's bounding box instead of the whole frame.
 severity_thresholds:
   minor: 0.02      # area_ratio <  0.02            -> minor
   moderate: 0.08   # 0.02 <= area_ratio < 0.08      -> moderate
