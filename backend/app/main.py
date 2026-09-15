@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import annotate
 
 app = FastAPI(
-    title="Car Damage Annotation & Quotation API",
+    title="Project X API",
     description="Detects car damage in an uploaded image, estimates severity, "
     "and returns a repair cost quotation.",
     version="0.1.0",

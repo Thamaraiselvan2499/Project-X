@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import AnnotatedImage from "./components/AnnotatedImage.jsx";
+import HowItWorks from "./components/HowItWorks.jsx";
 import QuotationTable from "./components/QuotationTable.jsx";
 import UploadPanel from "./components/UploadPanel.jsx";
 
@@ -41,9 +42,11 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>Car Damage Annotator</h1>
-        <p>Upload a photo of a damaged vehicle to detect damage and get an instant repair estimate.</p>
+        <h1>Project X</h1>
+        <p className="tagline">AI-powered car damage detection &amp; repair estimator</p>
       </header>
+
+      {!result && <HowItWorks />}
 
       <UploadPanel onFileSelected={handleFileSelected} isLoading={isLoading} error={error} />
 

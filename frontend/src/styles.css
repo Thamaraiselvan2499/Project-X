@@ -19,6 +19,40 @@ header h1 {
   margin-bottom: 4px;
 }
 
+header .tagline {
+  margin-top: 0;
+  color: #555;
+}
+
+.how-it-works {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.how-it-works-step {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.how-it-works-icon {
+  font-size: 1.6em;
+  line-height: 1;
+}
+
+.how-it-works-step p {
+  margin: 4px 0 0;
+  color: #555;
+  font-size: 0.9em;
+}
+
 .upload-panel {
   margin: 24px 0;
   padding: 24px;
